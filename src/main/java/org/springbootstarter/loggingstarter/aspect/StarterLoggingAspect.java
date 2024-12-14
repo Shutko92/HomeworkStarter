@@ -58,21 +58,16 @@ public class StarterLoggingAspect {
 
         if (response == null) {
             log.info("{} from {} returns nothing through controller", methodName, className);
-        } else if (response instanceof List<?>) {
-            logListResponse(methodName, className, (List<?>) response);
+        } else if (response instanceof List<?> responseList) {
+            log.info("{} from {} returns list of objects through controller. Examples:", methodName, className);
+            responseList.stream()
+                    .limit(10)
+                    .map(Object::toString)
+                    .forEach(log::info);
         } else {
             log.info("{} from {} returns through controller: {}", methodName, className, response);
         }
     }
-
-    private void logListResponse(String methodName, String className, List<?> responseList) {
-        log.info("{} from {} returns list of objects through controller. Examples:", methodName, className);
-        responseList.stream()
-                .limit(10)
-                .map(Object::toString)
-                .forEach(log::info);
-    }
-
 
     @After(value = "@annotation(org.springframework.web.bind.annotation.ExceptionHandler)")
     public void loggingControllerAdvice(JoinPoint joinPoint) {
