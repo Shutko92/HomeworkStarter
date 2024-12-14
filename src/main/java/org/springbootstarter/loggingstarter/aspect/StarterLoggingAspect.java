@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -56,16 +55,24 @@ public class StarterLoggingAspect {
     public void loggingServicesReturn(JoinPoint joinPoint, Object response) {
         String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
-        if (!(response instanceof List<?>) && response != null) {
-            log.info("{} from {} returns trough controller: {}", methodName, className, response);
-        } else if ((response instanceof List<?>) && response != null) {
-            ArrayList<?> responseList = (ArrayList<?>) response;
-            log.info("{} from {} returns list of objects trough controller. Examples:", methodName, className);
-            responseList.stream().limit(10).forEach(task -> log.info(task.toString()));
+
+        if (response == null) {
+            log.info("{} from {} returns nothing through controller", methodName, className);
+        } else if (response instanceof List<?>) {
+            logListResponse(methodName, className, (List<?>) response);
         } else {
-            log.info("{} from {} returns nothing trough controller", methodName, className);
+            log.info("{} from {} returns through controller: {}", methodName, className, response);
         }
     }
+
+    private void logListResponse(String methodName, String className, List<?> responseList) {
+        log.info("{} from {} returns list of objects through controller. Examples:", methodName, className);
+        responseList.stream()
+                .limit(10)
+                .map(Object::toString)
+                .forEach(log::info);
+    }
+
 
     @After(value = "@annotation(org.springframework.web.bind.annotation.ExceptionHandler)")
     public void loggingControllerAdvice(JoinPoint joinPoint) {
