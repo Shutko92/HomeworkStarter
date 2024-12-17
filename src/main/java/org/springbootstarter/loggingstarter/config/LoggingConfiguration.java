@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 @EnableConfigurationProperties(LoggingProperties.class)
 public class LoggingConfiguration {
     private final LoggingProperties properties;
-    //проперти используются через ConditionalOnProperty и как параметр в бине
+    //проперти используются через ConditionalOnProperty и как параметр в LoggingLevelManager
 
     public LoggingConfiguration(LoggingProperties properties) {
         this.properties = properties;
