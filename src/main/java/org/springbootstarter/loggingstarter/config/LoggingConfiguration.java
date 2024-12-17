@@ -8,17 +8,28 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
-@ConditionalOnProperty(prefix = "spring.logging-api", value = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "logging-api", value = "enabled", havingValue = "true")
 @EnableConfigurationProperties(LoggingProperties.class)
 public class LoggingConfiguration {
+    private final LoggingProperties properties;
+    //проперти используются через ConditionalOnProperty и как параметр в бине
+
+    public LoggingConfiguration(LoggingProperties properties) {
+        this.properties = properties;
+    }
 
     @Bean
-    StarterLoggingAspect starterLoggingAspect() {
-        return new StarterLoggingAspect();
+    StarterLoggingAspect starterLoggingAspect(LoggingLevelManager loggingLevelManager) {
+        return new StarterLoggingAspect(loggingLevelManager);
     }
 
     @Bean
     AnnotationValidator annotationValidator() {
         return new AnnotationValidator();
+    }
+
+    @Bean
+    LoggingLevelManager loggingLevelManager() {
+        return new LoggingLevelManager(properties.getLoggingLevel());
     }
 }

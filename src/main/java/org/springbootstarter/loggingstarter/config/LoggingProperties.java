@@ -2,7 +2,7 @@ package org.springbootstarter.loggingstarter.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("spring.logging-api")
+@ConfigurationProperties(prefix = "logging-api")
 public class LoggingProperties {
     private boolean enabled;
     private String loggingLevel;

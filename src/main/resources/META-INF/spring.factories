@@ -1,5 +1,2 @@
-org.springframework.boot.env.EnvironmentPostProcessor=\
-  org.springbootstarter.loggingstarter.init.LoggingEnvironmentPostProcessor
-
 org.springframework.boot.diagnostics.FailureAnalyzer=\
   org.springbootstarter.loggingstarter.analyzer.LoggingFailureAnalyzer

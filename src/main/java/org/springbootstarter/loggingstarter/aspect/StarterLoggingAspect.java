@@ -8,8 +8,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springbootstarter.loggingstarter.config.LoggingLevelManager;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -20,7 +19,11 @@ import java.util.stream.Collectors;
 
 @Aspect
 public class StarterLoggingAspect {
-    private static final Logger log = LoggerFactory.getLogger(StarterLoggingAspect.class);
+    private final LoggingLevelManager logger;
+
+    public StarterLoggingAspect(LoggingLevelManager logger) {
+        this.logger = logger;
+    }
 
     @Pointcut("@within(org.springbootstarter.loggingstarter.annotation.ControllerLogger)")
     public void controllerPointcut() {
@@ -36,7 +39,7 @@ public class StarterLoggingAspect {
         String methodName = joinPoint.getSignature().getName();
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String path = request.getRequestURI();
-        log.info("Controller: {} Called method {} with a path {}", controllerName, methodName, path);
+        logger.log("Controller: %s Called method %s with a path %s".formatted(controllerName, methodName, path));
     }
 
     @Before("servicePointcut()")
@@ -48,7 +51,7 @@ public class StarterLoggingAspect {
         if (params.isEmpty()) {
             params = "without params";
         }
-        log.info("Service: {} Called method {} with params - {}", className, methodName, params);
+        logger.log("Service: %s Called method %s with params - %s".formatted(className, methodName, params));
     }
 
     @AfterReturning(value = "servicePointcut()", returning = "response")
@@ -57,15 +60,15 @@ public class StarterLoggingAspect {
         String methodName = joinPoint.getSignature().getName();
 
         if (response == null) {
-            log.info("{} from {} returns nothing through controller", methodName, className);
+            logger.log("%s from %s returns nothing through controller".formatted(methodName, className));
         } else if (response instanceof List<?> responseList) {
-            log.info("{} from {} returns list of objects through controller. Examples:", methodName, className);
+            logger.log("%s from %s returns list of objects through controller. Examples:".formatted(methodName, className));
             responseList.stream()
                     .limit(10)
                     .map(Object::toString)
-                    .forEach(log::info);
+                    .forEach(logger::log);
         } else {
-            log.info("{} from {} returns through controller: {}", methodName, className, response);
+            logger.log("%s from %s returns through controller: %s".formatted(methodName, className, response));
         }
     }
 
@@ -83,13 +86,13 @@ public class StarterLoggingAspect {
             exception.append(exceptionsOptional.get().getClass().getName());
             message.append(exceptionsOptional.get().getMessage());
         }
-        log.warn("Exception intercepted {}, message: {}, controller: {}, method: {}",
-                exception, message, className, methodName);
+        logger.log("Exception intercepted %s, message: %s, controller: %s, method: %s"
+                .formatted(exception, message, className, methodName));
     }
 
     @AfterThrowing(value = "servicePointcut()", throwing = "ex")
     public void loggingServicesThrowing(JoinPoint joinPoint, Throwable ex) {
         String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
-        log.warn("Exception intercepted in {}, with throwing - {}", className, ex.getMessage());
+        logger.log("Exception intercepted in %s, with throwing - %s".formatted(className, ex.getMessage()));
     }
 }
